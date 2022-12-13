@@ -70,23 +70,23 @@ userRouter.get('/users/:id', async (req, res) => {
 
 userRouter.put('/users/:id', async (req, res) => {
   try {
-    const updateId = String(req.params.id);
-    const updatedInfo = await prisma.User.update({
+    // const updateId = req.params.id;
+    const updatedInfo = await prisma.user.upsert({
       where: {
-        id: updateId,
+        id: String(req.params.id),
       },
       data: {
-        name: req.body.name || undefined,
-        password: req.body.password || undefined,
-        email: req.body.email || undefined,
-        birthday: req.body.birthday || undefined,
-        contact: req.body.contact || undefined,
-        emergencyContact: req.body.emergencyContact || undefined,
-        insuranceProvider: req.body.insuranceProvider || undefined,
-        medications: req.body.medications || undefined,
-        allergies: req.body.allergies || undefined,
-        communicationDifficulties: req.body.communicationDifficulties || undefined,
-        preferredTreatments: req.body.preferredTreatments || undefined,
+        name: req.body.name,
+        password: req.body.password,
+        email: req.body.email,
+        birthday: req.body.birthday,
+        contact: req.body.contact,
+        emergencyContact: req.body.emergencyContact,
+        insuranceProvider: req.body.insuranceProvider,
+        medications: req.body.medications,
+        allergies: req.body.allergies,
+        communicationDifficulties: req.body.communicationDifficulties,
+        preferredTreatments: req.body.preferredTreatments,
       }
     })
     res.status(200).json(updatedInfo);
