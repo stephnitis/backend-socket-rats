@@ -1,6 +1,7 @@
 'use strict';
 
 const express = require('express');
+const { password } = require('pg/lib/defaults.js');
 
 require('dotenv').config();
 const userRouter = express.Router();
@@ -9,11 +10,11 @@ const prisma = require('../prisma/prisma.js');
 
 userRouter.post('/users', async (req, res) => {
   try {
-    const {name, email, contact, emergencyContact} = req.body;
+    const {name, password, contact, emergencyContact} = req.body;
     const newUser = await prisma.User.create({
       data: {
         name: name,
-        email: email,
+        password: password,
         contact: contact,
         emergencyContact: emergencyContact,
         // trips: {
@@ -28,7 +29,7 @@ userRouter.post('/users', async (req, res) => {
         // }
       }
     });
-    res.status(201).json({user});
+    res.status(201).json({newUser});
   } catch (e) {
     console.log(e);
   }
