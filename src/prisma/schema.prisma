@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(cuid())
+  name String
+  password String
+  email String? @unique
+  birthday DateTime? @db.Date
+  contact String
+  emergencyContact String
+  insuranceProvider String?
+  medications String?
+  allergies String?
+  communicationDifficulties String?
+  preferredTreatments String?
+  role Role @default(USER)
+  
+  trips Trip[]
+}
+
+model Trip {
+  id String @id @default(cuid())
+  coordinates String?
+  trailName String
+  startTime DateTime @db.Timetz()
+  returnTime DateTime @db.Timetz()
+  routeDetails String?
+
+  user User[]
+}
+
+enum Role {
+  USER
+  DISPATCH
+  ADMIN
+}

@@ -1,12 +1,19 @@
 'use strict';
 
+require('dotenv').config();
 const express = require('express');
-const PORT = process.env.PORT || 3002;
+
 const notFound = require('./error-handlers/404');
 const errorHandler = require('./error-handlers/500');
+const userRouter = require('./routes/users');
 
 const app = express();
+const cors = require('cors');
+
+app.use(cors());
 app.use(express.json());
+
+app.use(userRouter);
 
 app.get('/', (req, res, next) => {
   res.status(200).send('hello');
@@ -20,8 +27,8 @@ app.use('*', notFound);
 
 app.use(errorHandler);
 
-function start(){
-  app.listen(PORT, () => console.log('listening on port', PORT));
-}
 
-module.exports = {app, start};
+module.exports = {
+  start:(PORT) => app.listen(PORT, console.log('Server started on port:', PORT)),
+  app
+};
