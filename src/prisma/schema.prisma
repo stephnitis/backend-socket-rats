@@ -32,11 +32,11 @@ model Trip {
   id String @id @default(cuid())
   coordinates String?
   trailName String
-  startTime DateTime @db.Timetz()
-  returnTime DateTime @db.Timetz()
+  startTime DateTime 
+  returnTime DateTime 
   routeDetails String?
-
-  user User[]
+  hiker User @relation(fields: [userId], references: [id])
+  userId String
 }
 
 enum Role {

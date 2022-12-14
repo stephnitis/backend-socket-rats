@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-const { password } = require('pg/lib/defaults.js');
 
 require('dotenv').config();
 const userRouter = express.Router();
