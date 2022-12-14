@@ -16,16 +16,6 @@ userRouter.post('/users', async (req, res) => {
         password: password,
         contact: contact,
         emergencyContact: emergencyContact,
-        // trips: {
-        //   connectOrCreate: trips.map((trip) => ({
-        //     where: {
-        //       name: trip,
-        //     },
-        //     create: {
-        //       name: trip
-        //     }
-        //   }))
-        // }
       }
     });
     res.status(201).json({ newUser });
