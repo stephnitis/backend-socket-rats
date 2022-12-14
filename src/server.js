@@ -6,6 +6,7 @@ const express = require('express');
 const notFound = require('./error-handlers/404');
 const errorHandler = require('./error-handlers/500');
 const userRouter = require('./routes/users');
+const tripsRouter = require('./routes/trips')
 
 const app = express();
 const cors = require('cors');
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use(userRouter);
+app.use(tripsRouter);
 
 app.get('/', (req, res, next) => {
   res.status(200).send('hello');

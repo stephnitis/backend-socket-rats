@@ -1,7 +1,6 @@
 'use strict';
 
 const express = require('express');
-const { password } = require('pg/lib/defaults.js');
 
 require('dotenv').config();
 const userRouter = express.Router();
@@ -17,16 +16,6 @@ userRouter.post('/users', async (req, res) => {
         password: password,
         contact: contact,
         emergencyContact: emergencyContact,
-        // trips: {
-        //   connectOrCreate: trips.map((trip) => ({
-        //     where: {
-        //       name: trip,
-        //     },
-        //     create: {
-        //       name: trip
-        //     }
-        //   }))
-        // }
       }
     });
     res.status(201).json({ newUser });
@@ -87,6 +76,20 @@ userRouter.put('/users/:id', async (req, res) => {
     console.log(e);
   }
 })
+
+userRouter.delete('/users/:id', async (req, res) => {
+  try {
+    const user = await prisma.user.delete({
+      where: {
+        id: String(req.params.id),
+      },
+    });
+    res.status(200).send('user account deleted');
+  } catch (e) {
+    console.log(e);
+  }
+});
+
 
 
 module.exports = userRouter;
