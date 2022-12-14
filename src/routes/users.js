@@ -88,5 +88,19 @@ userRouter.put('/users/:id', async (req, res) => {
   }
 })
 
+userRouter.delete('/users/:id', async (req, res) => {
+  try {
+    const user = await prisma.user.delete({
+      where: {
+        id: String(req.params.id),
+      },
+    });
+    res.status(200).send('user account deleted');
+  } catch (e) {
+    console.log(e);
+  }
+});
+
+
 
 module.exports = userRouter;
