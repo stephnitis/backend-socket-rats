@@ -4,6 +4,8 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const {Server} = require('socket.io');
+const {auth} = require('express-openid-connect');
+
 const notFound = require('./error-handlers/404');
 const errorHandler = require('./error-handlers/500');
 const userRouter = require('./routes/users');
@@ -12,8 +14,19 @@ const tripsRouter = require('./routes/trips')
 const app = express();
 const cors = require('cors');
 
+const config = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: 'process.env.SECRET',
+  baseURL: 'http://localhost:3000',
+  clientID: 'process.env.CLIENT_ID',
+  // issuerBaseURL: 'process.env.ISSUER_BASE_URL',
+  // tokenSigningAlg: 'HS256'
+};
+
 app.use(cors());
 app.use(express.json());
+app.use(auth(config));
 
 app.use(userRouter);
 app.use(tripsRouter);
@@ -25,6 +38,27 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   }
 });
+
+// var createToken = require('auth0-api-tokens')({
+//   clientId: 'process.env.AUTH0_CLIENT_ID',
+//   clientSecret: new Buffer(process.env.AUTH0_CLIENT_SECRET, 'base64'),
+// })
+
+// io.use(socketioJwt.authorize({
+//   secret: new Buffer(process.env.SECRET, 'base64'),
+//   handshake: true
+// }));
+
+io.use((socket, next) => {
+  //whenever client connects with user...this handshake will hold
+  console.log(socket.handshake)
+  // if handshake is approved then user can move on
+  // if(socket.handshake[]==='' && socket.handshake[]===''){
+  //   next();
+  // } else {
+  //   next(new Error())
+  // }
+})
 
 //dispatch will need access to multiple rooms
 //private response?
@@ -47,8 +81,12 @@ io.on('connection', (socket) => {
   });
 });
 
+// app.get('/', requiresAuth(), (req, res) => {
+//   res.send(JSON.stringify(req.oidc.user));
+// });
+
 app.get('/', (req, res, next) => {
-  res.status(200).send('hello');
+  res.status(200).send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
 });
 
 app.get('/bad', (req, res, next) => {

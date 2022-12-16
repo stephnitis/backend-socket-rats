@@ -4,9 +4,12 @@ const express = require('express');
 
 require('dotenv').config();
 const tripsRouter = express.Router();
-
+const { requiresAuth } = require('express-openid-connect');
 const prisma = require('../prisma/prisma.js');
-const userRouter = require('./users.js');
+
+tripsRouter.get('/trips', requiresAuth(), (req, res) => {
+  res.send(JSON.stringify(req.oidc.user));
+});
 
 tripsRouter.post('/trips', async (req, res) => {
   try {
