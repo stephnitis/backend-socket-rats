@@ -7,9 +7,14 @@ const tripsRouter = express.Router();
 const { requiresAuth } = require('express-openid-connect');
 const prisma = require('../prisma/prisma.js');
 
-tripsRouter.get('/trips', requiresAuth(), (req, res) => {
+// tripsRouter.get('/trips', requiresAuth(), (req, res) => {
+//   res.send(JSON.stringify(req.oidc.user));
+// });
+
+tripsRouter.get('/trips', (req, res) => {
   res.send(JSON.stringify(req.oidc.user));
 });
+
 
 tripsRouter.post('/trips', async (req, res) => {
   try {

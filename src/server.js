@@ -15,12 +15,12 @@ const app = express();
 const cors = require('cors');
 
 const config = {
+  issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
+  baseURL: process.env.BASE_URL,
+  clientID: process.env.CLIENT_ID,
+  secret: process.env.SESSION_SECRET,
   authRequired: false,
   auth0Logout: true,
-  secret: 'process.env.SECRET',
-  baseURL: 'http://localhost:3000',
-  clientID: 'process.env.CLIENT_ID',
-  // issuerBaseURL: 'process.env.ISSUER_BASE_URL',
   // tokenSigningAlg: 'HS256'
 };
 
@@ -35,7 +35,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: 'http://localhost:3000',
-    methods: ['GET', 'POST'],
+    // methods: ['GET', 'POST'],
   }
 });
 
@@ -49,26 +49,26 @@ const io = new Server(server, {
 //   handshake: true
 // }));
 
-io.use((socket, next) => {
-  //whenever client connects with user...this handshake will hold
-  console.log(socket.handshake)
-  // if handshake is approved then user can move on
-  // if(socket.handshake[]==='' && socket.handshake[]===''){
-  //   next();
-  // } else {
-  //   next(new Error())
-  // }
-})
+// io.use((socket, next) => {
+//   whenever client connects with user...this handshake will hold
+//   console.log(socket.handshake)
+//   if handshake is approved then user can move on
+//   if(socket.handshake[]==='' && socket.handshake[]===''){
+//     next();
+//   } else {
+//     next(new Error())
+//   }
+// })
 
 //dispatch will need access to multiple rooms
 //private response?
 //manage a dispatch board that handles the multitude of requests
 io.on('connection', (socket) => {
-  console.log(`User Connected: ${socket.id}`);
+  // console.log(`User Connected: ${socket.id}`);
 
   socket.on('join', (data) => {
     socket.join(data);
-    console.log(`User with ID: ${socket.id} ${data}`);
+    // console.log(`User with ID: ${socket.id} ${data}`);
   });
 
   socket.on('send_message', (data) => {
@@ -77,7 +77,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('User Disconnected', socket.id);
+    // console.log('User Disconnected', socket.id);
   });
 });
 
@@ -86,11 +86,23 @@ io.on('connection', (socket) => {
 // });
 
 app.get('/', (req, res, next) => {
-  res.status(200).send(req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out');
+  res.status(200).send(req.oidc.isAuthenticated() ? `hello ${req.oidc.user.name}` : 'Logged out');
+});
+
+app.get('/', (req, res) => {
+  res.send(`hello ${req.oidc.user.name}`);
 });
 
 app.get('/bad', (req, res, next) => {
   next('this route is bad');
+});
+
+app.get('/sign-up', (req, res) => {
+  res.oidc.login({
+    authorizationParams: {
+      screen_hint: 'signup',
+    },
+  });
 });
 
 app.use('*', notFound);
