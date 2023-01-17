@@ -4,7 +4,10 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const {Server} = require('socket.io');
-const {auth} = require('express-openid-connect');
+// const { auth } = require('express-openid-connect');
+const { auth } = require('express-oauth2-jwt-bearer');
+var { expressjwt: jwt } = require('express-jwt');
+var jwks = require('jwks-rsa');
 
 const notFound = require('./error-handlers/404');
 const errorHandler = require('./error-handlers/500');
@@ -14,19 +17,38 @@ const tripsRouter = require('./routes/trips')
 const app = express();
 const cors = require('cors');
 
-const config = {
-  issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
-  baseURL: process.env.BASE_URL,
-  clientID: process.env.CLIENT_ID,
-  secret: process.env.SESSION_SECRET,
-  authRequired: false,
-  auth0Logout: true,
-  // tokenSigningAlg: 'HS256'
-};
+// const config = {
+//   issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
+//   baseURL: process.env.BASE_URL,
+//   clientID: process.env.CLIENT_ID,
+//   secret: process.env.SESSION_SECRET,
+//   authRequired: false,
+//   auth0Logout: true,
+//   audience: 'http://localhost:3002/',
+//   tokenSigningAlg: 'RS256'
+// };
+
+var jwtCheck = jwt({
+  secret: jwks.expressJwtSecret({
+      cache: true,
+      rateLimit: true,
+      jwksRequestsPerMinute: 5,
+      jwksUri: process.env.JWKS_URI
+}),
+audience: process.env.BASE_URL,
+issuer: process.env.AUTH0_ISSUER_BASE_URL,
+algorithms: ['RS256']
+});
+
+app.use(jwtCheck);
+
+app.get('/authorized', function (req, res) {
+res.send('Secured Resource');
+});
 
 app.use(cors());
 app.use(express.json());
-app.use(auth(config));
+// app.use(auth(config));
 
 app.use(userRouter);
 app.use(tripsRouter);
@@ -38,27 +60,6 @@ const io = new Server(server, {
     // methods: ['GET', 'POST'],
   }
 });
-
-// var createToken = require('auth0-api-tokens')({
-//   clientId: 'process.env.AUTH0_CLIENT_ID',
-//   clientSecret: new Buffer(process.env.AUTH0_CLIENT_SECRET, 'base64'),
-// })
-
-// io.use(socketioJwt.authorize({
-//   secret: new Buffer(process.env.SECRET, 'base64'),
-//   handshake: true
-// }));
-
-// io.use((socket, next) => {
-//   whenever client connects with user...this handshake will hold
-//   console.log(socket.handshake)
-//   if handshake is approved then user can move on
-//   if(socket.handshake[]==='' && socket.handshake[]===''){
-//     next();
-//   } else {
-//     next(new Error())
-//   }
-// })
 
 //dispatch will need access to multiple rooms
 //private response?
@@ -85,25 +86,21 @@ io.on('connection', (socket) => {
 //   res.send(JSON.stringify(req.oidc.user));
 // });
 
-app.get('/', (req, res, next) => {
-  res.status(200).send(req.oidc.isAuthenticated() ? `hello ${req.oidc.user.name}` : 'Logged out');
-});
-
-app.get('/', (req, res) => {
-  res.send(`hello ${req.oidc.user.name}`);
-});
+// app.get('/', (req, res, next) => {
+//   res.status(200).send(req.oidc.isAuthenticated() ? `hello ${req.oidc.user.name}` : 'Logged out');
+// });
 
 app.get('/bad', (req, res, next) => {
   next('this route is bad');
 });
 
-app.get('/sign-up', (req, res) => {
-  res.oidc.login({
-    authorizationParams: {
-      screen_hint: 'signup',
-    },
-  });
-});
+// app.get('/sign-up', (req, res) => {
+//   res.oidc.login({
+//     authorizationParams: {
+//       screen_hint: 'signup',
+//     },
+//   });
+// });
 
 app.use('*', notFound);
 
